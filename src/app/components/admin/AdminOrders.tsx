@@ -123,7 +123,7 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
   });
 
   const filteredOrders = useMemo(() => {
-    let filtered = mockOrders.filter(order => {
+    let filtered = ordersSource.filter(order => {
       const matchesSearch = 
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -153,7 +153,7 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
     });
 
     return filtered;
-  }, [searchTerm, statusFilter, sortBy]);
+  }, [searchTerm, statusFilter, sortBy, ordersSource]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -187,7 +187,7 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
             <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockOrders.length}</div>
+            <div className="text-2xl font-bold">{ordersSource.length}</div>
           </CardContent>
         </Card>
 
@@ -196,8 +196,8 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {mockOrders.filter(o => o.status === 'pending').length}
+              <div className="text-2xl font-bold">
+              {ordersSource.filter(o => o.status === 'pending').length}
             </div>
           </CardContent>
         </Card>
@@ -208,7 +208,7 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mockOrders.filter(o => o.status === 'processing').length}
+              {ordersSource.filter(o => o.status === 'processing').length}
             </div>
           </CardContent>
         </Card>
@@ -219,7 +219,7 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatUsdAsPhp(mockOrders.reduce((sum, order) => sum + order.total, 0))}
+              {formatUsdAsPhp(ordersSource.reduce((sum, order) => sum + order.total, 0))}
             </div>
           </CardContent>
         </Card>
