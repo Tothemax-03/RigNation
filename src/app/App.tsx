@@ -16,6 +16,7 @@ import { AdminUsers } from './components/admin/AdminUsers';
 import { Navbar } from './components/Navbar';
 import { AdminSidebar } from './components/admin/AdminSidebar';
 import { AuthDialog } from './components/AuthDialog';
+import { Facebook, Github, Mail } from 'lucide-react';
 
 // Auth Context
 interface User {
@@ -412,10 +413,15 @@ export default function App() {
                   <div>
                     <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-400">Follow</h4>
                     <div className="mt-3 flex items-center gap-3 text-sm">
-                      <a className="footer-social" href="#" aria-label="RigNation on X">X</a>
-                      <a className="footer-social" href="#" aria-label="RigNation on Instagram">IG</a>
-                      <a className="footer-social" href="#" aria-label="RigNation on YouTube">YT</a>
-                      <a className="footer-social" href="#" aria-label="RigNation on LinkedIn">IN</a>
+                      <a className="footer-social" href="https://www.facebook.com/https.max07" target="_blank" rel="noreferrer" aria-label="RigNation on Facebook">
+                        <Facebook className="h-4 w-4" />
+                      </a>
+                      <a className="footer-social" href="https://github.com/Tothemax-03/RigNation" target="_blank" rel="noreferrer" aria-label="RigNation on GitHub">
+                        <Github className="h-4 w-4" />
+                      </a>
+                      <a className="footer-social" href="mailto:paulczarcataylo13@gmail.com" aria-label="Email RigNation">
+                        <Mail className="h-4 w-4" />
+                      </a>
                     </div>
                   </div>
                 </div>
