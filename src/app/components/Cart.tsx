@@ -17,7 +17,7 @@ interface CartProps {
 }
 
 export function Cart({ navigateTo }: CartProps) {
-  const { user, cart, updateCartQuantity, removeFromCart, clearCart } = useAuth();
+  const { user, cart, updateCartQuantity, removeFromCart, clearCart, createOrder } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderForm, setOrderForm] = useState({
     name: user?.name || '',
@@ -48,12 +48,28 @@ export function Cart({ navigateTo }: CartProps) {
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simulate checkout process
+    const placedOrder = createOrder({
+      customer: orderForm.name,
+      email: orderForm.email,
+      phone: orderForm.phone,
+      address: orderForm.address,
+      city: orderForm.city,
+      zipCode: orderForm.zipCode,
+      paymentMethod: orderForm.paymentMethod,
+      status: 'processing',
+      total,
+      items: cart.map((item) => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+    });
+
     setTimeout(() => {
       clearCart();
       setShowCheckout(false);
-      toast.success('Order placed successfully! You will receive a confirmation email shortly.');
-      navigateTo('home');
+      toast.success(`Order ${placedOrder.id} placed successfully! Track it in your profile.`);
+      navigateTo('profile');
     }, 2000);
   };
 

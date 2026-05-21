@@ -38,6 +38,8 @@ interface AuthContextType {
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  orders: Order[];
+  createOrder: (order: Omit<Order, 'id' | 'createdAt' | 'tracking'>) => Order;
   showAuthDialog: (title?: string, message?: string) => void;
 }
 
@@ -48,6 +50,39 @@ interface CartItem {
   image: string;
   quantity: number;
   stock: number;
+}
+
+interface OrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface OrderTrackingStep {
+  label: string;
+  completed: boolean;
+  timestamp?: string;
+}
+
+interface Order {
+  id: string;
+  createdAt: string;
+  customer: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  zipCode: string;
+  paymentMethod: string;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  total: number;
+  items: OrderItem[];
+  tracking: {
+    number: string;
+    carrier: string;
+    eta: string;
+    steps: OrderTrackingStep[];
+  };
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -65,6 +100,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [authDialog, setAuthDialog] = useState({
     isOpen: false,
     title: 'Authentication Required',
@@ -181,11 +217,40 @@ export default function App() {
     localStorage.removeItem('cart');
   };
 
+  const createOrder = (order: Omit<Order, 'id' | 'createdAt' | 'tracking'>) => {
+    const trackingSteps: OrderTrackingStep[] = [
+      { label: 'Order placed', completed: true, timestamp: new Date().toISOString() },
+      { label: 'Processing payment', completed: order.status !== 'pending' },
+      { label: 'Packed for shipping', completed: order.status === 'shipped' || order.status === 'delivered' },
+      { label: 'Out for delivery', completed: order.status === 'delivered' },
+      { label: 'Delivered', completed: order.status === 'delivered' }
+    ];
+
+    const createdOrder: Order = {
+      ...order,
+      id: `#${Date.now().toString().slice(-6)}`,
+      createdAt: new Date().toISOString(),
+      tracking: {
+        number: `RN-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+        carrier: 'RigNation Express',
+        eta: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        steps: trackingSteps
+      }
+    };
+
+    const nextOrders = [createdOrder, ...orders];
+    setOrders(nextOrders);
+    localStorage.setItem('orders', JSON.stringify(nextOrders));
+    localStorage.setItem('lastOrderId', createdOrder.id);
+    return createdOrder;
+  };
+
   // Load saved data on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     const savedFavorites = localStorage.getItem('favorites');
     const savedCart = localStorage.getItem('cart');
+    const savedOrders = localStorage.getItem('orders');
     
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -201,6 +266,9 @@ export default function App() {
     }
     if (savedCart) {
       setCart(JSON.parse(savedCart));
+    }
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
     }
   }, []);
 
@@ -239,6 +307,8 @@ export default function App() {
     removeFromCart,
     updateCartQuantity,
     clearCart,
+    orders,
+    createOrder,
     showAuthDialog
   };
 
