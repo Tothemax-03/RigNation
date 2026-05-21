@@ -99,6 +99,28 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date-desc');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [ordersSource, setOrdersSource] = useState<Order[]>(() => {
+    try {
+      const saved = localStorage.getItem('orders');
+      if (saved) {
+        const parsed = JSON.parse(saved) as any[];
+        // Map persisted orders to admin Order shape when possible
+        return parsed.map((o) => ({
+          id: o.id || o.orderId || '#',
+          customer: o.customer || o.name || o.customerName || 'Unknown',
+          email: o.email || o.customerEmail || '',
+          date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : (o.date || ''),
+          status: o.status || 'pending',
+          total: o.total || 0,
+          items: (o.items || []).map((it: any) => ({ name: it.name, quantity: it.quantity || it.qty || 1, price: it.price || 0 })),
+          address: o.address || ''
+        }));
+      }
+    } catch (e) {
+      // ignore parse errors and fall back to mockOrders
+    }
+    return mockOrders;
+  });
 
   const filteredOrders = useMemo(() => {
     let filtered = mockOrders.filter(order => {
@@ -249,6 +271,26 @@ export function AdminOrders({ navigateTo }: AdminOrdersProps) {
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Export
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                // Clear orders where customer is John Doe
+                const remaining = ordersSource.filter(o => o.customer !== 'John Doe');
+                setOrdersSource(remaining);
+                try {
+                  const saved = localStorage.getItem('orders');
+                  if (saved) {
+                    const parsed = JSON.parse(saved) as any[];
+                    const filtered = parsed.filter(p => (p.customer || p.name) !== 'John Doe');
+                    localStorage.setItem('orders', JSON.stringify(filtered));
+                  }
+                } catch (e) {
+                  console.error('Failed to update persisted orders', e);
+                }
+              }}
+            >
+              Clear John Doe Orders
             </Button>
           </div>
         </CardContent>
